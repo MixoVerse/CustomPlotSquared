@@ -19,6 +19,7 @@
 package com.plotsquared.bukkit.listener;
 
 import com.google.inject.Inject;
+import com.plotsquared.bukkit.BukkitPlatform;
 import com.plotsquared.bukkit.util.BukkitEntityUtil;
 import com.plotsquared.bukkit.util.BukkitUtil;
 import com.plotsquared.core.configuration.caption.TranslatableCaption;
@@ -33,7 +34,9 @@ import com.plotsquared.core.plot.world.PlotAreaManager;
 import com.plotsquared.core.util.PlotFlagUtil;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -45,6 +48,8 @@ import org.bukkit.event.entity.LingeringPotionSplashEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.projectiles.BlockProjectileSource;
 import org.bukkit.projectiles.ProjectileSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -104,8 +109,27 @@ public class ProjectileEventListener implements Listener {
         }
         PlotPlayer<Player> pp = BukkitUtil.adapt((Player) shooter);
         Plot plot = location.getOwnedPlot();
+        Player p = (Player) shooter;
 
         if (plot == null) {
+
+            // Fix elytra bug here ...
+            if(entity instanceof Firework) {
+                Firework firework = (Firework) entity;
+
+                if(p.isGliding()){
+                    ItemStack chestPlate = p.getInventory().getChestplate();
+
+                    // Has eltrya attached
+                    if(chestPlate != null && chestPlate.getType().equals(Material.ELYTRA)){
+                        entity.setMetadata("toBeRemoved", new FixedMetadataValue(BukkitPlatform.getPlugin(BukkitPlatform.class), null));
+                        event.setCancelled(false);
+                        return;
+                    }
+                }
+            }
+            // End fix
+
             if (!PlotFlagUtil.isAreaRoadFlagsAndFlagEquals(area, ProjectilesFlag.class, true) && !pp.hasPermission(
                     Permission.PERMISSION_ADMIN_PROJECTILE_ROAD
             )) {
@@ -120,6 +144,24 @@ public class ProjectileEventListener implements Listener {
                 event.setCancelled(true);
             }
         } else if (!plot.hasOwner()) {
+
+            // Fix elytra bug here ...
+            if(entity instanceof Firework) {
+                Firework firework = (Firework) entity;
+
+                if(p.isGliding()){
+                    ItemStack chestPlate = p.getInventory().getChestplate();
+
+                    // Has eltrya attached
+                    if(chestPlate != null && chestPlate.getType().equals(Material.ELYTRA)){
+                        entity.setMetadata("toBeRemoved", new FixedMetadataValue(BukkitPlatform.getPlugin(BukkitPlatform.class), null));
+                        event.setCancelled(false);
+                        return;
+                    }
+                }
+            }
+            // End fix
+
             if (!pp.hasPermission(Permission.PERMISSION_ADMIN_PROJECTILE_UNOWNED)) {
                 pp.sendMessage(
                         TranslatableCaption.of("permission.no_permission_event"),
@@ -132,6 +174,24 @@ public class ProjectileEventListener implements Listener {
                 event.setCancelled(true);
             }
         } else if (!plot.isAdded(pp.getUUID())) {
+
+            // Fix elytra bug here ...
+            if(entity instanceof Firework) {
+                Firework firework = (Firework) entity;
+
+                if(p.isGliding()){
+                    ItemStack chestPlate = p.getInventory().getChestplate();
+
+                    // Has eltrya attached
+                    if(chestPlate != null && chestPlate.getType().equals(Material.ELYTRA)){
+                        entity.setMetadata("toBeRemoved", new FixedMetadataValue(BukkitPlatform.getPlugin(BukkitPlatform.class), null));
+                        event.setCancelled(false);
+                        return;
+                    }
+                }
+            }
+            // End fix
+
             if (!plot.getFlag(ProjectilesFlag.class)) {
                 if (!pp.hasPermission(Permission.PERMISSION_ADMIN_PROJECTILE_OTHER)) {
                     pp.sendMessage(
